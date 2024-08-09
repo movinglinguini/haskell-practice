@@ -17,14 +17,39 @@ evalStr s = safeEval (parseExp Lit Add Mul s)
 
 -- Exercise 3
 class Expr a where
-  lit :: a -> ExprT
-  mul :: a -> a -> ExprT
-  add :: a -> a -> ExprT
+  lit :: Integer -> a
+  mul :: a -> a -> a
+  add :: a -> a -> a
 
 instance Expr ExprT where
-  lit = id
+  lit x = Lit x
   mul = Mul
   add = Add
 
-reify :: ExprT -> ExprT
-reify = id
+-- Exercise 4
+instance Expr Integer where
+  lit x = x
+  mul a b = a * b
+  add a b = a + b
+
+instance Expr Bool where
+  lit x = if x <= 0 then False else True
+  mul a b = a && b
+  add a b = a || b
+
+newtype MinMax = MinMax Integer deriving (Eq, Show)
+newtype Mod7 = Mod7 Integer deriving (Eq, Show)
+
+instance Expr MinMax where
+  lit x = MinMax x
+  mul (MinMax a) (MinMax b) = MinMax (maximum [a, b])
+  add (MinMax a) (MinMax b) = MinMax (minimum [a, b])
+
+instance Expr Mod7 where
+  lit x = Mod7 (x `mod` 7)
+  mul (Mod7 a) (Mod7 b) = Mod7 ((a * b) `mod` 7)
+  add (Mod7 a) (Mod7 b) = Mod7 ((a + b) `mod` 7)
+
+-- Exercise 6
+class HasVars where
+  var :: String -> a
